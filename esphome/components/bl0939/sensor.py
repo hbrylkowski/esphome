@@ -13,7 +13,7 @@ from esphome.const import (
     UNIT_AMPERE,
     UNIT_KILOWATT_HOURS,
     UNIT_VOLT,
-    UNIT_WATT,
+    UNIT_WATT, CONF_ADDRESS,
 )
 
 DEPENDENCIES = ["uart"]
@@ -81,6 +81,7 @@ CONFIG_SCHEMA = (
                 device_class=DEVICE_CLASS_ENERGY,
                 state_class=STATE_CLASS_TOTAL_INCREASING,
             ),
+            cv.Optional(CONF_ADDRESS, default=5): cv.uint8_t,
         }
     )
     .extend(cv.polling_component_schema("60s"))
@@ -92,6 +93,8 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
+
+    cg.add()
 
     if voltage_config := config.get(CONF_VOLTAGE):
         sens = await sensor.new_sensor(voltage_config)
